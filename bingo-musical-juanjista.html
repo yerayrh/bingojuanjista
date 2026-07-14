@@ -405,18 +405,62 @@ function buildMusicTitle(fileName){
   };
 }
 
+function normalizeMusicUrl(filePath, basePath = 'Music'){
+  if(!filePath) return null;
+  const cleaned = decodeURIComponent(String(filePath)).trim();
+  if(!cleaned || cleaned === '.' || cleaned === '..') return null;
+  const withoutLeadingSlash = cleaned.replace(/^\/+/, '');
+  const withoutDotSlash = withoutLeadingSlash.replace(/^\.\//, '');
+  const relativePath = withoutDotSlash.replace(/^\s+|\s+$/g, '');
+  if(!relativePath) return null;
+  if(relativePath.startsWith(basePath + '/')) return relativePath;
+  if(relativePath.startsWith(basePath)) return relativePath;
+  return `${basePath}/${relativePath}`.replace(/\/+/g, '/');
+}
+
 async function fetchServerMusicFiles(basePath = 'Music'){
-  try{
-    const response = await fetch(basePath + '/');
-    if(!response.ok) throw new Error(`HTTP ${response.status}`);
-    const html = await response.text();
-    const matches = [...html.matchAll(/href=["']([^"']+)["']/g)].map(m => m[1]).filter(href => !href.startsWith('?') && !href.startsWith('/'));
-    const audioFiles = matches.filter(href => /\.(mp3|m4a|ogg|wav)$/i.test(href));
-    return audioFiles.map(file => `${basePath}/${file}`);
-  }catch(e){
-    console.warn('No se pudo leer la carpeta Music del servidor', e);
-    return [];
+  const candidates = [
+    `${basePath}/`,
+    `./${basePath}/`,
+    `/${basePath}/`,
+    `${basePath}/files.json`,
+    `./${basePath}/files.json`,
+    `/${basePath}/files.json`
+  ];
+
+  for(const candidate of candidates){
+    try{
+      const response = await fetch(candidate, { cache: 'no-store' });
+      if(!response.ok) continue;
+
+      if(candidate.endsWith('/files.json')){
+        const data = await response.json();
+        const entries = Array.isArray(data) ? data : (data.files || []);
+        const audioFiles = entries
+          .map(entry => typeof entry === 'string' ? entry : (entry.path || entry.url || entry.name || ''))
+          .map(entry => normalizeMusicUrl(entry, basePath))
+          .filter(Boolean)
+          .filter(url => /\.(mp3|m4a|ogg|wav)$/i.test(url));
+        if(audioFiles.length) return audioFiles;
+        continue;
+      }
+
+      const html = await response.text();
+      const matches = [...html.matchAll(/href=["']([^"']+)["']/g)]
+        .map(m => m[1])
+        .filter(href => !href.startsWith('?') && !href.startsWith('/') && !href.startsWith('../') && !href.endsWith('/'));
+      const audioFiles = matches
+        .map(href => normalizeMusicUrl(href, basePath))
+        .filter(Boolean)
+        .filter(url => /\.(mp3|m4a|ogg|wav)$/i.test(url));
+      if(audioFiles.length) return audioFiles;
+    }catch(e){
+      console.warn(`No se pudo leer ${candidate} del servidor`, e);
+    }
   }
+
+  console.warn('No se pudo leer la carpeta Music del servidor');
+  return [];
 }
 
 async function importFromMusicFolder(){
