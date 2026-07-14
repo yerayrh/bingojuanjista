@@ -390,24 +390,39 @@ function decodeHtmlEntities(str){
 }
 
 function buildMusicTitle(fileName, metadata = null){
-  const baseName = (fileName || '').replace(/\.[^/.]+$/, '').replace(/[_-]+/g, ' ').trim();
-  const cleanName = baseName || 'Canción local';
+  const safeName = String(fileName || '').trim();
+  const baseName = safeName.replace(/\.[^/.]+$/, '').trim();
   const titleFromMeta = (metadata && metadata.title) ? String(metadata.title).trim() : '';
   const artistFromMeta = (metadata && metadata.artist) ? String(metadata.artist).trim() : '';
 
   if(titleFromMeta || artistFromMeta){
     return {
-      title: titleFromMeta || cleanName,
+      title: titleFromMeta || baseName || 'Canción local',
       artist: artistFromMeta || 'Música local'
     };
   }
 
-  const parts = cleanName.split(/\s*[–—-]\s*/).map(p=>p.trim()).filter(Boolean);
+  const cleaned = baseName
+    .replace(/^\s*(?:\d{1,3}[.)\s-]+)+/, '')
+    .replace(/[_]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const cleanName = cleaned || 'Canción local';
+  const parts = cleanName.split(/\s*(?:-|–|—)\s*/).map(p=>p.trim()).filter(Boolean);
+  const versionPattern = /(remix|version|radio edit|live|acoustic|instrumental|official|edit|extended|mix)$/i;
+
   if(parts.length >= 2){
-    return {
-      title: parts[parts.length - 1],
-      artist: parts.slice(0, -1).join(' / ')
-    };
+    const left = parts[0];
+    const right = parts[parts.length - 1];
+    const hasMeaningfulSplit = left.length >= 2 && right.length >= 2 && !versionPattern.test(right);
+
+    if(hasMeaningfulSplit){
+      return {
+        title: right,
+        artist: parts.slice(0, -1).join(' / ')
+      };
+    }
   }
 
   return {
