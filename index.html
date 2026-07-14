@@ -599,12 +599,29 @@ function getSiteBaseUrl(){
   return `${window.location.origin}${basePath}`;
 }
 
+function getGithubRawBaseUrl(){
+  const host = window.location.hostname || '';
+  if(!host.endsWith('github.io')) return null;
+  const pathParts = (window.location.pathname || '').split('/').filter(Boolean);
+  if(pathParts.length === 0) return null;
+  const repo = pathParts[0];
+  const owner = host.split('.')[0];
+  if(!owner || !repo) return null;
+  return `https://raw.githubusercontent.com/${owner}/${repo}/main/`;
+}
+
 function buildAssetUrl(resourcePath){
   if(!resourcePath) return '';
   if(/^https?:\/\//i.test(resourcePath) || /^data:/i.test(resourcePath) || /^blob:/i.test(resourcePath) || resourcePath.startsWith('//')){
     return resourcePath;
   }
   const cleaned = String(resourcePath).trim().replace(/^\/+/, '').replace(/^\.\//, '');
+  if(/^Music\//i.test(cleaned)){
+    const githubRawBase = getGithubRawBaseUrl();
+    if(githubRawBase){
+      return new URL(cleaned, githubRawBase).toString();
+    }
+  }
   return new URL(cleaned, getSiteBaseUrl()).toString();
 }
 
