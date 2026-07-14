@@ -440,6 +440,15 @@ function readFileAsArrayBuffer(file){
   });
 }
 
+function readFileAsDataUrl(file){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = ()=>resolve(reader.result);
+    reader.onerror = ()=>reject(reader.error || new Error('No se pudo leer el archivo'));
+    reader.readAsDataURL(file);
+  });
+}
+
 function decodeTextBytes(bytes, encoding){
   const decoder = new TextDecoder(encoding === 'utf-16' || encoding === 'utf-16be' || encoding === 'utf-16le' ? 'utf-16' : encoding === 'utf-8' ? 'utf-8' : 'latin1');
   return decoder.decode(bytes).replace(/\u0000/g, '').trim();
@@ -588,13 +597,13 @@ async function importLocalAudioFiles(fileList){
     if(existingNames.has(file.name)) continue;
     const metadata = await readAudioMetadata(file);
     const { title, artist } = buildMusicTitle(file.name, metadata);
-    const objectUrl = URL.createObjectURL(file);
+    const dataUrl = await readFileAsDataUrl(file);
     importedSongs.push({
       id: uid(),
       title,
       artist,
       mediaType: 'audio',
-      mediaUrl: objectUrl,
+      mediaUrl: dataUrl,
       chorusStart: null,
       chorusSource: null,
       sourceName: file.name
