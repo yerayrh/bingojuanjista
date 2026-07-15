@@ -177,7 +177,7 @@ footer{text-align:center;color:var(--parchment-dim);font-size:12px;margin-top:30
     <div class="card">
       <h2>Importar canciones desde la carpeta Music</h2>
 
-      <div class="hint">La app puede cargar canciones desde la carpeta Music del servidor o directamente desde archivos locales de tu equipo.</div>
+      <div class="hint">La app busca una carpeta llamada "music" o "Music" junto a este index.html y comprueba, uno a uno, qué archivos existen realmente antes de añadirlos. También puedes importar archivos locales de tu equipo.</div>
       <div class="row" style="margin-top:12px; flex-wrap:wrap;">
         <button class="primary" id="btnImportFolder">Cargar playlist desde Music</button>
         <button id="btnImportLocal" type="button">Importar archivos locales</button>
@@ -521,77 +521,80 @@ async function readAudioMetadata(file){
   }
 }
 
-const DEFAULT_MUSIC_FILES = [
-  '1. Yo Quiero Bailar.mp3',
-  '10. La chica yeyé.mp3',
-  '11. Cuando zarpa el amor.mp3',
-  '12. Ave María.mp3',
-  '13. The Ketchup Song (Aserejé) - Spanish Version.mp3',
-  '14. Salta!!!.mp3',
-  '15. Hay que venir al sur.mp3',
-  '16. Mari Carmen.mp3',
-  '17. El Toro Guapo.mp3',
-  '18. Como Camarón.mp3',
-  '19. Física o química.mp3',
-  '2. Torero.mp3',
-  '20. Sarandonga.mp3',
-  '21. Y Yo Sigo Aqui - Spanglish.mp3',
-  '22. Bamboleo _ Cantinero de Cuba _ Djobí, Djobá _ Se Pasaban los Días _ Me Va, Me Va _ Mi Guitarra _ Color Moreno _ Ay Peregrina!.mp3',
-  '23. Aquí no hay playa.mp3',
-  '24. La Mujer del Pelotero.mp3',
-  '25. Paquito el Chocolatero.mp3',
-  '26. Te Quiero Más.mp3',
-  '27. Levantando las Manos.mp3',
-  '28. Fiesta Pagana.mp3',
-  '29. Tractor Amarillo.mp3',
-  '3. A quién le importa.mp3',
-  '30. Que La Detengan - Remix.mp3',
-  '31. El Vals del Obrero.mp3',
-  '32. Chiquilla.mp3',
-  '33. Alcohol, Alcohol, Alcohol.mp3',
-  '34. Cannabis.mp3',
-  '35. Amigos para Siempre.mp3',
-  '36. Hablando en plata - 2003 Remastered Version.mp3',
-  '37. Livin\' la Vida Loca - Spanish Version.mp3',
-  '38. Tiburon.mp3',
-  '39. Echa Pa\'lla (Manos Pa\'rriba) (feat. Papayo).mp3',
-  '4. Y Viva España.mp3',
-  '40. 20 de abril.mp3',
-  '41. Quiero tener tu presencia.mp3',
-  '42. Marta, Sebas, Guille y los demás.mp3',
-  '43. Ahí Viene el Bombero.mp3',
-  '44. No Rompas Más Mi Pobre Corazón.mp3',
-  '45. La Bomba.mp3',
-  '46. ¡Chas! Y aparezco a tu lado.mp3',
-  '47. Sabor de amor.mp3',
-  '48. Sevilla Tiene un Color Especial.mp3',
-  '49. Todos Los Besos.mp3',
-  '5. La Bilirrubina.mp3',
-  '50. Feo, fuerte y formal.mp3',
-  '51. Princesas.mp3',
-  '52. Cuando Brille el Sol.mp3',
-  '53. Resistiré.mp3',
-  '54. Solo Se Vive una Vez.mp3',
-  '55. Como Ronea (15 Aniversario).mp3',
-  '56. Volando Voy.mp3',
-  '57. La Isla del Amor (feat. Maki).mp3',
-  '58. A toda mecha.mp3',
-  '59. Ritmo De La Noche.mp3',
-  '6. Mayonesa.mp3',
-  '60. Que El Ritmo No Pare.mp3',
-  '61. El Baile De La Ola.mp3',
-  '62. Volare (Nel Blu di Pinto di Blu).mp3',
-  '63. El Baile del Gorila.mp3',
-  '64. Ven, Ven, Ven.mp3',
-  '65. Vas A Volverme Loca.mp3',
-  '66. Corazon Latino.mp3',
-  '67. Enamorado de la moda juvenil.mp3',
-  '68. No Estamos Lokos - Kalikeño.mp3',
-  '69. Soy un Truhán, Soy un Señor.mp3',
-  '7. La Canción Del Velero.mp3',
-  '8. Todos los días sale el sol.mp3',
-  '9. La Barbacoa.mp3'
+const SONG_METADATA = [
+  { fileName: "Sonia Y Selena - Yo Quiero Bailar.mp3", title: "Yo Quiero Bailar", artist: "Sonia Y Selena" },
+  { fileName: "Chayanne - Torero.mp3", title: "Torero", artist: "Chayanne" },
+  { fileName: "Alaska Y Dinarama - A quién le importa.mp3", title: "A quién le importa", artist: "Alaska Y Dinarama" },
+  { fileName: "Manolo Escobar - Y Viva España.mp3", title: "Y Viva España", artist: "Manolo Escobar" },
+  { fileName: "Juan Luis Guerra 4.40 - La Bilirrubina.mp3", title: "La Bilirrubina", artist: "Juan Luis Guerra 4.40" },
+  { fileName: "Chocolate - Mayonesa.mp3", title: "Mayonesa", artist: "Chocolate" },
+  { fileName: "La Fiesta - La Canción Del Velero.mp3", title: "La Canción Del Velero", artist: "La Fiesta" },
+  { fileName: "Bongo Botrako - Todos los días sale el sol.mp3", title: "Todos los días sale el sol", artist: "Bongo Botrako" },
+  { fileName: "Georgie Dann - La Barbacoa.mp3", title: "La Barbacoa", artist: "Georgie Dann" },
+  { fileName: "Ole Ole - La chica yeyé.mp3", title: "La chica yeyé", artist: "Ole Ole" },
+  { fileName: "Camela - Cuando zarpa el amor.mp3", title: "Cuando zarpa el amor", artist: "Camela" },
+  { fileName: "David Bisbal - Ave María.mp3", title: "Ave María", artist: "David Bisbal" },
+  { fileName: "Las Ketchup - The Ketchup Song (Aserejé) - Spanish Version.mp3", title: "The Ketchup Song (Aserejé) - Spanish Version", artist: "Las Ketchup" },
+  { fileName: "Tequila - Salta!!!.mp3", title: "Salta!!!", artist: "Tequila" },
+  { fileName: "Raffaela Carrá - Hay que venir al sur.mp3", title: "Hay que venir al sur", artist: "Raffaela Carrá" },
+  { fileName: "La Pegatina - Mari Carmen.mp3", title: "Mari Carmen", artist: "La Pegatina" },
+  { fileName: "El Fary - El Toro Guapo.mp3", title: "El Toro Guapo", artist: "El Fary" },
+  { fileName: "Estopa - Como Camarón.mp3", title: "Como Camarón", artist: "Estopa" },
+  { fileName: "Despistaos - Física o química.mp3", title: "Física o química", artist: "Despistaos" },
+  { fileName: "Lolita - Sarandonga.mp3", title: "Sarandonga", artist: "Lolita" },
+  { fileName: "Paulina Rubio - Y Yo Sigo Aqui - Spanglish.mp3", title: "Y Yo Sigo Aqui - Spanglish", artist: "Paulina Rubio" },
+  { fileName: "La Banda del Capitán CanallaThe Refrescos - Aquí no hay playa.mp3", title: "Aquí no hay playa", artist: "La Banda del Capitán Canalla / The Refrescos" },
+  { fileName: "Baby Lores - La Mujer del Pelotero.mp3", title: "La Mujer del Pelotero", artist: "Baby Lores" },
+  { fileName: "Los Tuneaos - Paquito el Chocolatero.mp3", title: "Paquito el Chocolatero", artist: "Los Tuneaos" },
+  { fileName: "Fórmula Abierta - Te Quiero Más.mp3", title: "Te Quiero Más", artist: "Fórmula Abierta" },
+  { fileName: "El Simbolo - Levantando las Manos.mp3", title: "Levantando las Manos", artist: "El Simbolo" },
+  { fileName: "Mägo de Oz - Fiesta Pagana.mp3", title: "Fiesta Pagana", artist: "Mägo de Oz" },
+  { fileName: "Zapato Veloz - Tractor Amarillo.mp3", title: "Tractor Amarillo", artist: "Zapato Veloz" },
+  { fileName: "David Civera - Que La Detengan - Remix.mp3", title: "Que La Detengan - Remix", artist: "David Civera" },
+  { fileName: "Ska-P - El Vals del Obrero.mp3", title: "El Vals del Obrero", artist: "Ska-P" },
+  { fileName: "Seguridad Social - Chiquilla.mp3", title: "Chiquilla", artist: "Seguridad Social" },
+  { fileName: "Los Inhumanos - Alcohol, Alcohol, Alcohol.mp3", title: "Alcohol, Alcohol, Alcohol", artist: "Los Inhumanos" },
+  { fileName: "Ska-P - Cannabis.mp3", title: "Cannabis", artist: "Ska-P" },
+  { fileName: "Los Manolos - Amigos para Siempre.mp3", title: "Amigos para Siempre", artist: "Los Manolos" },
+  { fileName: "Melendi - Hablando en plata - 2003 Remastered Version.mp3", title: "Hablando en plata - 2003 Remastered Version", artist: "Melendi" },
+  { fileName: "Ricky Martin - Livin' la Vida Loca - Spanish Version.mp3", title: "Livin' la Vida Loca - Spanish Version", artist: "Ricky Martin" },
+  { fileName: "Proyecto Uno - Tiburon.mp3", title: "Tiburon", artist: "Proyecto Uno" },
+  { fileName: "PitbullPapayo - Echa Pa'lla (Manos Pa'rriba) (feat. Papayo).mp3", title: "Echa Pa'lla (Manos Pa'rriba) (feat. Papayo)", artist: "Pitbull / Papayo" },
+  { fileName: "Celtas Cortos - 20 de abril.mp3", title: "20 de abril", artist: "Celtas Cortos" },
+  { fileName: "Seguridad Social - Quiero tener tu presencia.mp3", title: "Quiero tener tu presencia", artist: "Seguridad Social" },
+  { fileName: "Amaral - Marta, Sebas, Guille y los demás.mp3", title: "Marta, Sebas, Guille y los demás", artist: "Amaral" },
+  { fileName: "Ángel Rec - Ahí Viene el Bombero.mp3", title: "Ahí Viene el Bombero", artist: "Ángel Rec" },
+  { fileName: "Los Felinos - No Rompas Más Mi Pobre Corazón.mp3", title: "No Rompas Más Mi Pobre Corazón", artist: "Los Felinos" },
+  { fileName: "King Africa - La Bomba.mp3", title: "La Bomba", artist: "King Africa" },
+  { fileName: "Alex Y Christina - ¡Chas! Y aparezco a tu lado.mp3", title: "¡Chas! Y aparezco a tu lado", artist: "Alex Y Christina" },
+  { fileName: "Danza Invisible - Sabor de amor.mp3", title: "Sabor de amor", artist: "Danza Invisible" },
+  { fileName: "Los Del Rio - Sevilla Tiene un Color Especial.mp3", title: "Sevilla Tiene un Color Especial", artist: "Los Del Rio" },
+  { fileName: "Los Rebujitos - Todos Los Besos.mp3", title: "Todos Los Besos", artist: "Los Rebujitos" },
+  { fileName: "Loquillo - Feo, fuerte y formal.mp3", title: "Feo, fuerte y formal", artist: "Loquillo" },
+  { fileName: "Pereza - Princesas.mp3", title: "Princesas", artist: "Pereza" },
+  { fileName: "La Guardia - Cuando Brille el Sol.mp3", title: "Cuando Brille el Sol", artist: "La Guardia" },
+  { fileName: "Duo Dinamico - Resistiré.mp3", title: "Resistiré", artist: "Duo Dinamico" },
+  { fileName: "Azucar Moreno - Solo Se Vive una Vez.mp3", title: "Solo Se Vive una Vez", artist: "Azucar Moreno" },
+  { fileName: "Las ChuchesDaviles de Novelda - Como Ronea (15 Aniversario).mp3", title: "Como Ronea (15 Aniversario)", artist: "Las Chuches / Daviles de Novelda" },
+  { fileName: "Camaron De La Isla - Volando Voy.mp3", title: "Volando Voy", artist: "Camaron De La Isla" },
+  { fileName: "Demarco FlamencoMaki - La Isla del Amor (feat. Maki).mp3", title: "La Isla del Amor (feat. Maki)", artist: "Demarco Flamenco / Maki" },
+  { fileName: "S.J.K. - A toda mecha.mp3", title: "A toda mecha", artist: "S.J.K." },
+  { fileName: "Safri DuoClark Anderson - Ritmo De La Noche.mp3", title: "Ritmo De La Noche", artist: "Safri Duo / Clark Anderson" },
+  { fileName: "Patricia Manterola - Que El Ritmo No Pare.mp3", title: "Que El Ritmo No Pare", artist: "Patricia Manterola" },
+  { fileName: "3+2 - El Baile De La Ola.mp3", title: "El Baile De La Ola", artist: "3+2" },
+  { fileName: "Gipsy Kings - Volare (Nel Blu di Pinto di Blu).mp3", title: "Volare (Nel Blu di Pinto di Blu)", artist: "Gipsy Kings" },
+  { fileName: "Melody - El Baile del Gorila.mp3", title: "El Baile del Gorila", artist: "Melody" },
+  { fileName: "Sex Bomb - Ven, Ven, Ven.mp3", title: "Ven, Ven, Ven", artist: "Sex Bomb" },
+  { fileName: "Natalia - Vas A Volverme Loca.mp3", title: "Vas A Volverme Loca", artist: "Natalia" },
+  { fileName: "David Bisbal - Corazon Latino.mp3", title: "Corazon Latino", artist: "David Bisbal" },
+  { fileName: "Radio Futura - Enamorado de la moda juvenil.mp3", title: "Enamorado de la moda juvenil", artist: "Radio Futura" },
+  { fileName: "Ketama - No Estamos Lokos - Kalikeño.mp3", title: "No Estamos Lokos - Kalikeño", artist: "Ketama" },
+  { fileName: "Julio Iglesias - Soy un Truhán, Soy un Señor.mp3", title: "Soy un Truhán, Soy un Señor", artist: "Julio Iglesias" },
+  { fileName: "Raya Real - Bamboleo  Cantinero de Cuba  Djobí, Djobá  Se Pasaban los Días  Me Va, Me Va  Mi Guitarra  Color Moreno  Ay Peregrina!.mp3", title: "Bamboleo / Cantinero de Cuba / Djobí, Djobá / Se Pasaban los Días / Me Va, Me Va / Mi Guitarra / Color Moreno / Ay Peregrina!", artist: "Raya Real" }
 ];
+
+const DEFAULT_MUSIC_FILES = SONG_METADATA.map(s => s.fileName);
+const SONG_METADATA_BY_FILENAME = Object.fromEntries(SONG_METADATA.map(s => [s.fileName, s]));
 
 function getSiteBaseUrl(){
   const currentPath = window.location.pathname.replace(/index\.html$/i, '').replace(/\/+$/, '');
@@ -616,13 +619,14 @@ function buildAssetUrl(resourcePath){
     return resourcePath;
   }
   const cleaned = String(resourcePath).trim().replace(/^\/+/, '').replace(/^\.\//, '');
-  if(/^Music\//i.test(cleaned)){
-    const githubRawBase = getGithubRawBaseUrl();
-    if(githubRawBase){
-      return new URL(cleaned, githubRawBase).toString();
-    }
-  }
-  return new URL(cleaned, getSiteBaseUrl()).toString();
+  const encodedPath = cleaned
+    .split('/')
+    .map(segment => encodeURIComponent(segment))
+    .join('/');
+  // En GitHub Pages los archivos se sirven desde el propio dominio del sitio,
+  // así que siempre resolvemos en relación a la URL actual (nada de raw.githubusercontent.com,
+  // que además asumía una rama 'main' que podría no existir).
+  return new URL(encodedPath, getSiteBaseUrl()).toString();
 }
 
 function normalizeMusicUrl(filePath, basePath = 'Music'){
@@ -638,7 +642,24 @@ function normalizeMusicUrl(filePath, basePath = 'Music'){
   return `${basePath}/${relativePath}`.replace(/\/+/g, '/');
 }
 
-async function fetchServerMusicFiles(basePath = 'Music'){
+const MUSIC_FOLDER_CANDIDATES = ['music', 'Music'];
+
+async function urlExists(url){
+  try{
+    let res = await fetch(url, { method:'HEAD', cache:'no-store' });
+    if(res.ok) return true;
+    if(res.status === 405 || res.status === 501){
+      // Algunos servidores no soportan HEAD: probamos con GET
+      res = await fetch(url, { method:'GET', cache:'no-store' });
+      return res.ok;
+    }
+    return false;
+  }catch(e){
+    return false;
+  }
+}
+
+async function tryDirectoryListing(basePath){
   const candidates = [
     `${basePath}/`,
     `./${basePath}/`,
@@ -661,8 +682,8 @@ async function fetchServerMusicFiles(basePath = 'Music'){
           .map(entry => typeof entry === 'string' ? entry : (entry.path || entry.url || entry.name || ''))
           .map(entry => normalizeMusicUrl(entry, basePath))
           .filter(Boolean)
-          .filter(url => /\.(mp3|m4a|ogg|wav)$/i.test(url));
-        if(audioFiles.length) return audioFiles;
+          .filter(u => /\.(mp3|m4a|ogg|wav)$/i.test(u));
+        if(audioFiles.length) return { basePath, files: audioFiles, method: 'files.json', failed: [] };
         continue;
       }
 
@@ -673,15 +694,70 @@ async function fetchServerMusicFiles(basePath = 'Music'){
       const audioFiles = matches
         .map(href => normalizeMusicUrl(href, basePath))
         .filter(Boolean)
-        .filter(url => /\.(mp3|m4a|ogg|wav)$/i.test(url));
-      if(audioFiles.length) return audioFiles;
+        .filter(u => /\.(mp3|m4a|ogg|wav)$/i.test(u));
+      if(audioFiles.length) return { basePath, files: audioFiles, method: 'directory-listing', failed: [] };
     }catch(e){
       console.warn(`No se pudo leer ${candidate} del servidor`, e);
     }
   }
+  return null;
+}
 
-  console.warn('No se pudo leer la carpeta Music del servidor');
-  return DEFAULT_MUSIC_FILES.map(fileName => normalizeMusicUrl(`${basePath}/${fileName}`, basePath));
+async function verifyKnownFileList(basePath, fileNames){
+  const results = await Promise.all(fileNames.map(async fileName=>{
+    // Probamos la forma "normal" (NFC) y la "descompuesta" (NFD, típica de macOS)
+    // por si los acentos del nombre de archivo no coinciden byte a byte.
+    const variants = [
+      fileName.normalize('NFC'),
+      fileName.normalize('NFD')
+    ];
+    const uniqueVariants = [...new Set(variants)];
+
+    for(const variant of uniqueVariants){
+      const relative = normalizeMusicUrl(`${basePath}/${variant}`, basePath);
+      const fullUrl = buildAssetUrl(relative);
+      const ok = await urlExists(fullUrl);
+      if(ok) return { fileName, relative, fullUrl, ok: true };
+    }
+    return { fileName, relative: normalizeMusicUrl(`${basePath}/${fileName}`, basePath), fullUrl: buildAssetUrl(normalizeMusicUrl(`${basePath}/${fileName}`, basePath)), ok: false };
+  }));
+  return {
+    basePath,
+    files: results.filter(r => r.ok).map(r => r.relative),
+    failed: results.filter(r => !r.ok).map(r => r.fileName),
+    method: 'verified-individually'
+  };
+}
+
+async function fetchServerMusicFiles(){
+  if(window.location.protocol === 'file:'){
+    return {
+      basePath: MUSIC_FOLDER_CANDIDATES[0],
+      files: [],
+      failed: [],
+      method: 'file-protocol'
+    };
+  }
+
+  // 1) Intentar listado de carpeta o files.json, probando 'music' y 'Music'
+  for(const basePath of MUSIC_FOLDER_CANDIDATES){
+    const result = await tryDirectoryListing(basePath);
+    if(result) return result;
+  }
+
+  // 2) Verificar uno a uno la lista de nombres conocida, probando ambas mayúsculas/minúsculas
+  for(const basePath of MUSIC_FOLDER_CANDIDATES){
+    const result = await verifyKnownFileList(basePath, DEFAULT_MUSIC_FILES);
+    if(result.files.length > 0) return result;
+  }
+
+  // 3) Nada funcionó: devolvemos diagnóstico vacío con la lista de lo que se probó
+  return {
+    basePath: MUSIC_FOLDER_CANDIDATES[0],
+    files: [],
+    failed: DEFAULT_MUSIC_FILES,
+    method: 'none'
+  };
 }
 
 async function importLocalAudioFiles(fileList){
@@ -700,8 +776,15 @@ async function importLocalAudioFiles(fileList){
 
   for(const file of files){
     if(existingNames.has(file.name)) continue;
-    const metadata = await readAudioMetadata(file);
-    const { title, artist } = buildMusicTitle(file.name, metadata);
+    const knownMeta = SONG_METADATA_BY_FILENAME[file.name];
+    let title, artist;
+    if(knownMeta){
+      title = knownMeta.title;
+      artist = knownMeta.artist;
+    } else {
+      const metadata = await readAudioMetadata(file);
+      ({ title, artist } = buildMusicTitle(file.name, metadata));
+    }
     const dataUrl = await readFileAsDataUrl(file);
     importedSongs.push({
       id: uid(),
@@ -729,12 +812,29 @@ async function importLocalAudioFiles(fileList){
 async function importFromMusicFolder(){
   const button = document.getElementById('btnImportFolder');
   button.disabled = true;
-  button.textContent = 'Cargando...';
+  button.textContent = 'Comprobando archivos...';
 
   try{
-    const filePaths = await fetchServerMusicFiles();
+    const result = await fetchServerMusicFiles();
+
+    if(result.method === 'file-protocol'){
+      alert('Esta página se está abriendo directamente desde tu ordenador (la dirección empieza por "file://"). Los navegadores bloquean estas peticiones cuando no hay un servidor real detrás.\n\nSube index.html y la carpeta "music" a tu servidor (o pruébalo con un servidor local) y vuelve a intentarlo desde esa URL.');
+      return;
+    }
+
+    const filePaths = result.files || [];
+
     if(filePaths.length === 0){
-      alert('No se han encontrado archivos de audio en la carpeta Music del servidor.');
+      const triedNames = (result.failed || []).slice(0, 5).join('\n - ');
+      alert(
+        `No se ha encontrado ningún archivo de audio en el servidor.\n\n` +
+        `Se han probado las carpetas: ${MUSIC_FOLDER_CANDIDATES.join(', ')}\n` +
+        (triedNames ? `Ejemplos de rutas comprobadas que han fallado:\n - ${triedNames}\n\n` : '\n') +
+        `Revisa que:\n` +
+        `1) La carpeta esté al mismo nivel que este index.html.\n` +
+        `2) Los nombres de archivo coincidan exactamente (mayúsculas, acentos, espacios).\n` +
+        `3) La página esté servida por http(s), no abierta como archivo local.`
+      );
       return;
     }
 
@@ -743,7 +843,9 @@ async function importFromMusicFolder(){
       .filter(url => !existingUrls.has(url))
       .map(url => {
         const fileName = url.split('/').pop() || 'canción';
-        const { title, artist } = buildMusicTitle(fileName);
+        const decodedFileName = decodeURIComponent(fileName);
+        const knownMeta = SONG_METADATA_BY_FILENAME[decodedFileName];
+        const { title, artist } = knownMeta || buildMusicTitle(decodedFileName);
         return {
           id: uid(),
           title,
@@ -752,22 +854,27 @@ async function importFromMusicFolder(){
           mediaUrl: url,
           chorusStart: null,
           chorusSource: null,
-          sourceName: fileName
+          sourceName: decodedFileName
         };
       });
 
     if(importedSongs.length === 0){
-      alert('Ya estaban cargadas todas las canciones de la carpeta Music.');
+      alert(`Ya estaban cargadas todas las canciones encontradas en la carpeta "${result.basePath}".`);
       return;
     }
 
     songs.push(...importedSongs);
     saveSongs();
     renderTable();
-    alert(`Se han añadido ${importedSongs.length} canciones desde la carpeta Music.`);
+
+    let msg = `Se han añadido ${importedSongs.length} canciones desde la carpeta "${result.basePath}" (método: ${result.method}).`;
+    if(result.failed && result.failed.length){
+      msg += `\n\n${result.failed.length} archivo(s) de la lista conocida NO se han encontrado, por ejemplo:\n - ${result.failed.slice(0,5).join('\n - ')}`;
+    }
+    alert(msg);
   }catch(e){
     console.error(e);
-    alert('No se ha podido cargar la carpeta Music del servidor.');
+    alert('No se ha podido comprobar la carpeta de música del servidor. Mira la consola del navegador (F12) para más detalle: ' + (e && e.message ? e.message : e));
   }finally{
     button.disabled = false;
     button.textContent = 'Cargar playlist desde Music';
@@ -908,18 +1015,26 @@ function loadMedia(song, startSeconds){
   currentAudio = null;
 
   if(song.mediaType === 'audio' && song.mediaUrl){
+    const resolvedUrl = buildAssetUrl(song.mediaUrl);
     const audio = document.createElement('audio');
-    audio.src = buildAssetUrl(song.mediaUrl);
+    audio.src = resolvedUrl;
     audio.preload = 'auto';
     audio.volume = 1;
     audio.muted = false;
     audio.crossOrigin = 'anonymous';
-    audio.addEventListener('loadeddata', ()=>{
-      audio.play().catch(()=>{});
+    audio.addEventListener('canplay', ()=>{
+      audio.play().catch(err=>{
+        console.error('El navegador ha bloqueado la reproducción automática', err);
+        document.getElementById('timeLabel').textContent =
+          '⚠️ El navegador bloqueó la reproducción automática. Pulsa "Siguiente canción" de nuevo o toca la pantalla.';
+      });
     });
     audio.addEventListener('error', ()=>{
-      console.error('No se pudo cargar el audio', song.mediaUrl);
-      document.getElementById('timeLabel').textContent = 'No se pudo reproducir el archivo';
+      const codeMap = {1:'cancelado', 2:'error de red', 3:'no se pudo decodificar', 4:'formato/URL no soportado'};
+      const code = audio.error ? audio.error.code : null;
+      console.error('No se pudo cargar el audio', resolvedUrl, 'código:', code);
+      document.getElementById('timeLabel').textContent =
+        `⚠️ No se pudo cargar "${song.title}". Comprueba que este archivo existe exactamente en: ${resolvedUrl} (${codeMap[code] || 'error desconocido'})`;
     });
     host.appendChild(audio);
     currentAudio = audio;
