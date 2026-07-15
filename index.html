@@ -659,6 +659,15 @@ async function urlExists(url){
   }
 }
 
+async function verifyUrlList(relativeUrls){
+  const checks = await Promise.all(relativeUrls.map(async relative=>{
+    const fullUrl = buildAssetUrl(relative);
+    const ok = await urlExists(fullUrl);
+    return { relative, ok };
+  }));
+  return checks.filter(c => c.ok).map(c => c.relative);
+}
+
 async function tryDirectoryListing(basePath){
   const candidates = [
     `${basePath}/`,
@@ -678,11 +687,14 @@ async function tryDirectoryListing(basePath){
       if(candidate.endsWith('/files.json')){
         const data = await response.json();
         const entries = Array.isArray(data) ? data : (data.files || []);
-        const audioFiles = entries
+        const rawAudioFiles = entries
           .map(entry => typeof entry === 'string' ? entry : (entry.path || entry.url || entry.name || ''))
           .map(entry => normalizeMusicUrl(entry, basePath))
           .filter(Boolean)
           .filter(u => /\.(mp3|m4a|ogg|wav)$/i.test(u));
+        // OJO: un files.json puede estar desactualizado (nombres viejos que ya no existen).
+        // Verificamos archivo por archivo antes de confiar en él.
+        const audioFiles = await verifyUrlList(rawAudioFiles);
         if(audioFiles.length) return { basePath, files: audioFiles, method: 'files.json', failed: [] };
         continue;
       }
@@ -691,10 +703,11 @@ async function tryDirectoryListing(basePath){
       const matches = [...html.matchAll(/href=["']([^"']+)["']/g)]
         .map(m => m[1])
         .filter(href => !href.startsWith('?') && !href.startsWith('/') && !href.startsWith('../') && !href.endsWith('/'));
-      const audioFiles = matches
+      const rawAudioFiles = matches
         .map(href => normalizeMusicUrl(href, basePath))
         .filter(Boolean)
         .filter(u => /\.(mp3|m4a|ogg|wav)$/i.test(u));
+      const audioFiles = await verifyUrlList(rawAudioFiles);
       if(audioFiles.length) return { basePath, files: audioFiles, method: 'directory-listing', failed: [] };
     }catch(e){
       console.warn(`No se pudo leer ${candidate} del servidor`, e);
@@ -739,19 +752,36 @@ async function fetchServerMusicFiles(){
     };
   }
 
-  // 1) Intentar listado de carpeta o files.json, probando 'music' y 'Music'
-  for(const basePath of MUSIC_FOLDER_CANDIDATES){
-    const result = await tryDirectoryListing(basePath);
-    if(result) return result;
-  }
-
-  // 2) Verificar uno a uno la lista de nombres conocida, probando ambas mayúsculas/minúsculas
+  // 1) Prioridad: verificar uno a uno la lista de 69 canciones conocidas (la autoritativa,
+  //    la que coincide con tus nombres de archivo reales). Esto evita fiarnos de un
+  //    files.json/listado de carpeta que pueda estar desactualizado.
+  let primary = null;
   for(const basePath of MUSIC_FOLDER_CANDIDATES){
     const result = await verifyKnownFileList(basePath, DEFAULT_MUSIC_FILES);
-    if(result.files.length > 0) return result;
+    if(result.files.length > 0){ primary = result; break; }
   }
 
-  // 3) Nada funcionó: devolvemos diagnóstico vacío con la lista de lo que se probó
+  // 2) Complementar: si hay un files.json o listado de carpeta, lo usamos solo para
+  //    añadir archivos EXTRA que no estén ya en la lista conocida (verificando que existan).
+  for(const basePath of MUSIC_FOLDER_CANDIDATES){
+    const listing = await tryDirectoryListing(basePath);
+    if(listing && listing.files.length){
+      if(!primary){
+        primary = listing;
+      } else {
+        const existingSet = new Set(primary.files);
+        const extra = listing.files.filter(f => !existingSet.has(f));
+        if(extra.length){
+          primary = { ...primary, files: [...primary.files, ...extra], method: primary.method + '+directory-listing' };
+        }
+      }
+      break;
+    }
+  }
+
+  if(primary) return primary;
+
+  // 3) Nada funcionó
   return {
     basePath: MUSIC_FOLDER_CANDIDATES[0],
     files: [],
